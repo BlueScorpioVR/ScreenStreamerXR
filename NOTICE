@@ -1,0 +1,14 @@
+ScreenStreamerXR
+Copyright 2026 BlueScorpioVR
+
+This product is a derivative of RootEncoder
+https://github.com/pedroSG94/RootEncoder
+Copyright (C) pedroSG94 and contributors
+
+RootEncoder is licensed under the Apache License, Version 2.0.
+A copy of the license is in LICENSE.txt.
+
+You must retain the original copyright notices in source files.
+Modifications in this repository are for the Android XR screen
+streamer app (ScreenStreamerXR), including OmniStream ingest, events,
+viewer counts, TTS, and notifications.
