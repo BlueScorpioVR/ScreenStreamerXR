@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <string-array name="stream_targets">
+    <item>Twitch (RTMP)</item>
+    <item>YouTube (RTMP)</item>
+    <item>Custom URL</item>
+    <item>OmniStream</item>
+  </string-array>
+
+  <string-array name="audio_sources">
+    <item>Microphone</item>
+    <item>Internal Audio</item>
+    <item>Mix (Mic + Internal)</item>
+  </string-array>
+
+  <string-array name="resolutions">
+    <item>1080p 30fps (Rec: 6 Mbps upload)</item>
+    <item>1080p 60fps (Rec: 10 Mbps upload)</item>
+    <item>1440p 30fps (Rec: 15 Mbps upload)</item>
+    <item>1440p 60fps (Rec: 20 Mbps upload)</item>
+    <item>4K 30fps (Rec: 35 Mbps upload)</item>
+    <item>4K 60fps (Rec: 50 Mbps upload)</item>
+  </string-array>
+</resources>
