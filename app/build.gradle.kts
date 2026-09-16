@@ -12,7 +12,6 @@ android {
     targetSdk = 37
     versionCode = project.version.toString().replace(".", "").toInt()
     versionName = project.version.toString()
-    multiDexEnabled = true
     ndk {
       abiFilters += "arm64-v8a"
     }
@@ -43,10 +42,8 @@ kotlin {
 
 dependencies {
   implementation(project(":library"))
-  implementation(project(":extra-sources"))
   implementation(libs.androidx.constraintlayout)
   implementation(libs.androidx.appcompat)
-  implementation(libs.androidx.multidex)
   implementation(libs.material)
   implementation(libs.okhttp)
 }

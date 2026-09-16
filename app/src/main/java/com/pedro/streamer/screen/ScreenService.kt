@@ -555,7 +555,7 @@ class ScreenService: Service(), ConnectChecker {
   private fun keepAliveTrick() {
     val notification = NotificationCompat.Builder(this, CHANNEL_ID)
       .setSmallIcon(R.drawable.notification_icon)
-      .setContentTitle("XR Screen Streamer")
+      .setContentTitle("Screen Stream XR")
       .setContentText(if (genericStream.isStreaming) "Streaming" else "Listening for events")
       .setSilent(true)
       .setOngoing(false)

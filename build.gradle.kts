@@ -46,7 +46,6 @@ plugins {
 dependencies {
   dokka(project(":common"))
   dokka(project(":encoder"))
-  dokka(project(":extra-sources"))
   dokka(project(":library"))
   dokka(project(":rtmp"))
   dokka(project(":rtsp"))

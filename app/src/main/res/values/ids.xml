@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <item name="audio_source_microphone" type="id" />
+  <item name="audio_source_internal" type="id" />
+  <item name="audio_source_mix" type="id" />
+</resources>

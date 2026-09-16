@@ -17,18 +17,12 @@
 
 package com.pedro.streamer
 
-import android.os.Build
-import androidx.multidex.MultiDexApplication
+import android.app.Application
 import com.pedro.encoder.utils.gl.GlUtil
 
-/**
- * Created by pedro on 10/10/23.
- */
-class App: MultiDexApplication() {
+class App: Application() {
   override fun onCreate() {
     super.onCreate()
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
-      GlUtil.debugMode = BuildConfig.DEBUG
-    }
+    GlUtil.debugMode = BuildConfig.DEBUG
   }
 }

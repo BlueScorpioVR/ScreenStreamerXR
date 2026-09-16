@@ -10,15 +10,10 @@ appcompat = "1.6.1"
 #noinspection GradleDependency, version 2.2.0 need min sdk 21
 constraintlayout = "2.1.4"
 ktor = "3.5.2"
-#noinspection GradleDependency, version 1.6.0 need min sdk 23
-camerax = "1.5.3"
-multidex = "2.0.1"
 annotation = "1.10.0"
 coroutines = "1.11.0"
 junit = "4.13.2"
 mockito = "6.3.0"
-uvcandroid = "1.0.13"
-media3 = "1.11.0"
 bouncycastle = "1.84"
 material = "1.12.0"
 okhttp = "4.12.0"
@@ -26,19 +21,13 @@ okhttp = "4.12.0"
 [libraries]
 androidx-annotation = { module = "androidx.annotation:annotation", version.ref = "annotation" }
 androidx-appcompat = { module = "androidx.appcompat:appcompat", version.ref = "appcompat" }
-androidx-camera-core = { module = "androidx.camera:camera-core", version.ref = "camerax" }
-androidx-camera-camera2 = { module = "androidx.camera:camera-camera2", version.ref = "camerax" }
-androidx-camera-lifecycle = { module = "androidx.camera:camera-lifecycle", version.ref = "camerax" }
 androidx-constraintlayout = { module = "androidx.constraintlayout:constraintlayout", version.ref = "constraintlayout" }
-androidx-multidex = { module = "androidx.multidex:multidex", version.ref = "multidex" }
 junit = { module = "junit:junit", version.ref = "junit" }
 kotlinx-coroutines-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "coroutines" }
 kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "coroutines" }
 ktor-network = { module = "io.ktor:ktor-network", version.ref = "ktor" }
 ktor-network-tls = { module = "io.ktor:ktor-network-tls", version.ref = "ktor" }
 mockito-kotlin = { module = "org.mockito.kotlin:mockito-kotlin", version.ref = "mockito" }
-uvcandroid = { module = "com.herohan:UVCAndroid", version.ref = "uvcandroid" }
-androidx-media3-inspector = { module = "androidx.media3:media3-inspector", version.ref = "media3" }
 bouncycastle-bcprov = { module = "org.bouncycastle:bcprov-jdk15to18", version.ref = "bouncycastle" }
 bouncycastle-bctls = { module = "org.bouncycastle:bctls-jdk15to18", version.ref = "bouncycastle" }
 bouncycastle-bcpkix = { module = "org.bouncycastle:bcpkix-jdk15to18", version.ref = "bouncycastle" }
@@ -51,5 +40,3 @@ android-library = { id = "com.android.library", version.ref = "agp" }
 jetbrains-kotlin = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 jetbrains-dokka = { id = "org.jetbrains.dokka", version.ref = "dokka" }
 
-[bundles]
-androidx-camera = ["androidx-camera-core", "androidx-camera-camera2", "androidx-camera-lifecycle"]

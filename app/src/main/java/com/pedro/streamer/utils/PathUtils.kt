@@ -29,7 +29,7 @@ object PathUtils {
   @JvmStatic
   fun getRecordPath(): File {
     val storageDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MOVIES)
-    return File(storageDir.absolutePath + "/RootEncoder")
+    return File(storageDir.absolutePath + "/ScreenStreamerXR")
   }
 
   @JvmStatic
