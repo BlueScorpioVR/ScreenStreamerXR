@@ -9,7 +9,7 @@ dokka = "2.2.0"
 appcompat = "1.6.1"
 #noinspection GradleDependency, version 2.2.0 need min sdk 21
 constraintlayout = "2.1.4"
-ktor = "3.5.2"
+ktor = "3.6.0"
 annotation = "1.10.0"
 coroutines = "1.11.0"
 junit = "4.13.2"
