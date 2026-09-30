@@ -1,6 +1,14 @@
+import java.util.Properties
+
 plugins {
   alias(libs.plugins.android.application)
 }
+
+val keystoreProperties = Properties().apply {
+  val keystoreFile = rootProject.file("keystore.properties")
+  if (keystoreFile.exists()) keystoreFile.inputStream().use { load(it) }
+}
+val releaseStorePath = keystoreProperties.getProperty("storeFile") ?: System.getenv("RELEASE_STORE_FILE")
 
 android {
   namespace = "com.pedro.streamer"
@@ -16,6 +24,16 @@ android {
       abiFilters += "arm64-v8a"
     }
   }
+  signingConfigs {
+    if (releaseStorePath != null) {
+      create("release") {
+        storeFile = rootProject.file(releaseStorePath)
+        storePassword = keystoreProperties.getProperty("storePassword") ?: System.getenv("RELEASE_STORE_PASSWORD")
+        keyAlias = keystoreProperties.getProperty("keyAlias") ?: System.getenv("RELEASE_KEY_ALIAS")
+        keyPassword = keystoreProperties.getProperty("keyPassword") ?: System.getenv("RELEASE_KEY_PASSWORD")
+      }
+    }
+  }
   buildTypes {
     debug {
       isDebuggable = true
@@ -23,7 +41,7 @@ android {
     release {
       isMinifyEnabled = false
       isDebuggable = false
-      signingConfig = signingConfigs.getByName("debug")
+      signingConfig = signingConfigs.findByName("release") ?: signingConfigs.getByName("debug")
       proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
     }
   }

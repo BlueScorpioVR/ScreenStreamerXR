@@ -2,6 +2,8 @@
 
 Android XR app that captures the headset display and publishes it over RTMP. Chat, alerts, and viewer counts can stay connected even when the headset is not encoding.
 
+> **Beta (v0.1.0):** this is an early release. Expect rough edges, and settings or behavior may change between versions. Bug reports are welcome.
+
 ## Destinations
 
 - **Twitch** — RTMP ingest plus Twitch chat

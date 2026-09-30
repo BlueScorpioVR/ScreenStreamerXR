@@ -1,5 +1,5 @@
 allprojects {
-  group = "com.github.pedroSG94"
+  group = "com.github.BlueScorpioVR"
   version = "0.1.0"
 
   plugins.withType<PublishingPlugin> {
@@ -20,9 +20,9 @@ allprojects {
     configure<PublishingExtension> {
       publications.withType<MavenPublication>().all {
         pom {
-          name = "RootEncoder"
-          description = "A stream encoder to push video/audio to media servers"
-          url = "https://github.com/pedroSG94/RootEncoder"
+          name = "ScreenStreamerXR"
+          description = "Android XR screen streamer. Based on RootEncoder by pedroSG94 (https://github.com/pedroSG94/RootEncoder)."
+          url = "https://github.com/BlueScorpioVR/ScreenStreamerXR"
           licenses {
             license {
               name = "Apache-2.0"
