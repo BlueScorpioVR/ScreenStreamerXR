@@ -34,7 +34,7 @@ Open the project in Android Studio and run the `app` module, or:
 ./gradlew :app:assembleDebug
 ```
 
-Install the debug APK on an Android XR headset (for example via wireless ADB). minSdk is 21; the screen-capture path requires Android 5.0 (Lollipop) or newer.
+Install the debug APK on an Android XR headset (for example via wireless ADB). minSdk is 23 (Android 6.0).
 
 ## License
 
