@@ -11,11 +11,11 @@ val keystoreProperties = Properties().apply {
 val releaseStorePath = keystoreProperties.getProperty("storeFile") ?: System.getenv("RELEASE_STORE_FILE")
 
 android {
-  namespace = "com.pedro.streamer"
+  namespace = "com.bluescorpiovr.screenstreamerxr"
   compileSdk = 37
 
   defaultConfig {
-    applicationId = "com.pedro.streamer"
+    applicationId = "com.bluescorpiovr.screenstreamerxr"
     minSdk = 23
     targetSdk = 37
     versionCode = project.version.toString().replace(".", "").toInt()

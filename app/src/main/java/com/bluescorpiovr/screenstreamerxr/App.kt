@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package com.pedro.streamer
+package com.bluescorpiovr.screenstreamerxr
 
 import android.app.Application
 import com.pedro.encoder.utils.gl.GlUtil

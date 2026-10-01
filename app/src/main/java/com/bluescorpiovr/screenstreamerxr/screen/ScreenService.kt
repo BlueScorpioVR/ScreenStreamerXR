@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package com.pedro.streamer.screen
+package com.bluescorpiovr.screenstreamerxr.screen
 
 import android.app.Notification
 import android.app.NotificationChannel
@@ -46,9 +46,9 @@ import com.pedro.encoder.input.sources.video.NoVideoSource
 import com.pedro.encoder.input.sources.video.ScreenSource
 import com.pedro.library.base.recording.RecordController
 import com.pedro.library.generic.GenericStream
-import com.pedro.streamer.R
-import com.pedro.streamer.utils.PathUtils
-import com.pedro.streamer.utils.toast
+import com.bluescorpiovr.screenstreamerxr.R
+import com.bluescorpiovr.screenstreamerxr.utils.PathUtils
+import com.bluescorpiovr.screenstreamerxr.utils.toast
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -563,8 +563,7 @@ class ScreenService: Service(), ConnectChecker {
     if (Build.VERSION.SDK_INT >= 34) {
       val serviceTypes = if (mediaProjection != null) {
         ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PROJECTION or
-          ServiceInfo.FOREGROUND_SERVICE_TYPE_MICROPHONE or
-          ServiceInfo.FOREGROUND_SERVICE_TYPE_CAMERA
+          ServiceInfo.FOREGROUND_SERVICE_TYPE_MICROPHONE
       } else {
         ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC
       }

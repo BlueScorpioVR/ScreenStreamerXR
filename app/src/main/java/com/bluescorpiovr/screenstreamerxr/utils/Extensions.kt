@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.pedro.streamer.utils
+package com.bluescorpiovr.screenstreamerxr.utils
 
 import android.app.Activity
 import android.app.Service
@@ -25,7 +25,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updatePadding
-import com.pedro.streamer.R
+import com.bluescorpiovr.screenstreamerxr.R
 
 fun Activity.toast(message: String, duration: Int = Toast.LENGTH_SHORT) {
   Toast.makeText(this, message, duration).show()

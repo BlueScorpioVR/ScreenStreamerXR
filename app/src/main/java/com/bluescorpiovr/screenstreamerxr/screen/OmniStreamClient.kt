@@ -16,7 +16,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.pedro.streamer.screen
+package com.bluescorpiovr.screenstreamerxr.screen
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job

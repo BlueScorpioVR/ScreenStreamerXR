@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.pedro.streamer.screen
+package com.bluescorpiovr.screenstreamerxr.screen
 
 import android.Manifest
 import android.content.Context
@@ -37,9 +37,9 @@ import androidx.core.app.ActivityCompat
 import androidx.core.widget.doAfterTextChanged
 import com.google.android.material.tabs.TabLayout
 import com.pedro.library.base.recording.RecordController
-import com.pedro.streamer.R
-import com.pedro.streamer.utils.fitAppPadding
-import com.pedro.streamer.utils.toast
+import com.bluescorpiovr.screenstreamerxr.R
+import com.bluescorpiovr.screenstreamerxr.utils.fitAppPadding
+import com.bluescorpiovr.screenstreamerxr.utils.toast
 
 @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
 class ScreenActivity : AppCompatActivity(), ScreenServiceCallback {
@@ -97,7 +97,7 @@ class ScreenActivity : AppCompatActivity(), ScreenServiceCallback {
   private val prefs by lazy { getSharedPreferences("xr_stream_prefs", Context.MODE_PRIVATE) }
 
   private val permissions = mutableListOf(
-    Manifest.permission.RECORD_AUDIO, Manifest.permission.CAMERA,
+    Manifest.permission.RECORD_AUDIO,
   ).apply {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
       this.add(Manifest.permission.POST_NOTIFICATIONS)
