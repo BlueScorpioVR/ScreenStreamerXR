@@ -45,7 +45,6 @@ dependencies {
   api(project(":rtsp"))
   api(project(":srt"))
   api(project(":udp"))
-  api(project(":whip"))
   api(project(":common"))
   testImplementation(libs.kotlinx.coroutines.test)
   testImplementation(libs.junit)

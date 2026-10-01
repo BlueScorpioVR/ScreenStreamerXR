@@ -51,7 +51,6 @@ dependencies {
   dokka(project(":rtsp"))
   dokka(project(":srt"))
   dokka(project(":udp"))
-  dokka(project(":whip"))
 }
 
 tasks.named<org.jetbrains.dokka.gradle.tasks.DokkaGeneratePublicationTask>("dokkaGeneratePublicationHtml") {

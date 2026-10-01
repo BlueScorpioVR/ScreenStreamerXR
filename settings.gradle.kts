@@ -19,4 +19,4 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = "ScreenStreamerXR"
-include(":app", ":rtmp", ":encoder", ":rtsp", ":library", ":srt", ":udp", ":common", ":whip")
+include(":app", ":rtmp", ":encoder", ":rtsp", ":library", ":srt", ":udp", ":common")
