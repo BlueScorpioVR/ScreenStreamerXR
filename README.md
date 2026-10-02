@@ -1,4 +1,4 @@
-# Screen Stream XR
+# Screen Streamer XR
 
 Android XR app that captures the headset display and publishes it over RTMP. Chat, alerts, and viewer counts can stay connected even when the headset is not encoding.
 
@@ -40,4 +40,4 @@ Install the debug APK on an Android XR headset (for example via wireless ADB). m
 
 This repository is a derivative of [RootEncoder](https://github.com/pedroSG94/RootEncoder) by [pedroSG94](https://github.com/pedroSG94) and contributors. RootEncoder remains the copyrighted work of its authors and is licensed under the [Apache License 2.0](LICENSE.txt). See [NOTICE](NOTICE) for attribution.
 
-Modifications for Screen Stream XR (OmniStream ingest, events, viewer counts, TTS, and notifications) are by [BlueScorpioVR](https://github.com/BlueScorpioVR).
+Modifications for Screen Streamer XR (OmniStream ingest, events, viewer counts, TTS, and notifications) are by [BlueScorpioVR](https://github.com/BlueScorpioVR).
