@@ -187,7 +187,7 @@ public class MicrophoneManager {
   ) {
     boolean micResult = createMicrophone(audioSource, sampleRate, isStereo, echoCanceler, noiseSuppressor);
     if (!micResult) return false;
-    boolean internalResult = createInternalMicrophone(config, sampleRate, isStereo, echoCanceler, noiseSuppressor);
+    boolean internalResult = createInternalMicrophone(config, sampleRate, isStereo, false, false);
     mode = Mode.MIX;
     return internalResult;
   }
@@ -308,9 +308,11 @@ public class MicrophoneManager {
             Log.e(TAG, "read error: " + sizeInternal);
             return null;
           }
-          audioUtils.applyVolumeAndMix(pcmBuffer, microphoneVolume, pcmBufferDevice, internalVolume, pcmBufferMix);
-          byte[] data = muted ? pcmBufferMuted : Arrays.copyOf(customAudioEffect.process(pcmBufferMix), size);
-          return new Frame(data, 0, size, timeStamp);
+          int mixedSize = Math.min(size, sizeInternal) & ~1;
+          if (mixedSize == 0) return null;
+          audioUtils.applyVolumeAndMix(pcmBuffer, microphoneVolume, pcmBufferDevice, internalVolume, pcmBufferMix, mixedSize);
+          byte[] data = muted ? pcmBufferMuted : Arrays.copyOf(customAudioEffect.process(pcmBufferMix), mixedSize);
+          return new Frame(data, 0, mixedSize, timeStamp);
         }
         default -> { return null; }
     }

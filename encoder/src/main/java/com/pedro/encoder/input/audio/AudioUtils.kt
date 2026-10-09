@@ -7,10 +7,10 @@ class AudioUtils {
     fun applyVolumeAndMix(
         buffer: ByteArray, volume: Float,
         buffer2: ByteArray, volume2: Float,
-        dst: ByteArray
+        dst: ByteArray,
+        size: Int
     ) {
-        if (buffer.size != buffer2.size) return
-        for (i in buffer.indices step 2) {
+        for (i in 0 until size step 2) {
             val sample1 = ((buffer[i + 1].toInt() shl 8) or (buffer[i].toInt() and 0xFF)).toShort().toInt()
             val sample2 = ((buffer2[i + 1].toInt() shl 8) or (buffer2[i].toInt() and 0xFF)).toShort().toInt()
 

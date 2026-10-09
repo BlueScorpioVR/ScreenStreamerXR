@@ -25,6 +25,7 @@ import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.view.SurfaceHolder
 import android.view.SurfaceView
 import android.view.View
 import android.view.WindowManager
@@ -104,10 +105,20 @@ class ScreenActivity : AppCompatActivity(), ScreenServiceCallback {
     }
   }.toTypedArray()
 
+  private val requestPermissionLauncher = registerForActivityResult(
+    ActivityResultContracts.RequestMultiplePermissions()
+  ) { _ ->
+    if (hasPermissions(this)) {
+      getOrStartService()
+    } else {
+      toast("Audio and notification permissions are required for streaming")
+    }
+  }
+
   private val activityResultContract = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
     val data = result.data
     if (data != null && result.resultCode == RESULT_OK) {
-      val screenService = ScreenService.INSTANCE
+      val screenService = getOrStartService()
       if (screenService != null) {
         if (screenService.prepareStream(result.resultCode, data)) {
           when (action) {
@@ -137,18 +148,25 @@ class ScreenActivity : AppCompatActivity(), ScreenServiceCallback {
     loadPreferences()
     requestPermissions()
 
-    val screenService = ScreenService.INSTANCE
-    if (screenService == null) {
-      startService(Intent(this, ScreenService::class.java))
-    }
+    val screenService = getOrStartService()
     screenService?.setCallback(this)
 
     updateStreamButtons()
   }
 
+  private fun getOrStartService(): ScreenService? {
+    val service = ScreenService.INSTANCE
+    if (service == null) {
+      startService(Intent(this, ScreenService::class.java))
+      return null
+    }
+    service.ensurePrepared()
+    return service
+  }
+
   private fun requestPermissions() {
     if (!hasPermissions(this)) {
-      ActivityCompat.requestPermissions(this, permissions, 1)
+      requestPermissionLauncher.launch(permissions)
     }
   }
 
@@ -279,6 +297,18 @@ class ScreenActivity : AppCompatActivity(), ScreenServiceCallback {
       field.doAfterTextChanged { if (!isLoadingPreferences) savePreferences() }
     }
 
+    surfaceView.holder.addCallback(object : SurfaceHolder.Callback {
+      override fun surfaceCreated(holder: SurfaceHolder) {
+        if (tabLayout.selectedTabPosition == 1) {
+          ScreenService.INSTANCE?.startPreview(surfaceView)
+        }
+      }
+      override fun surfaceChanged(holder: SurfaceHolder, format: Int, width: Int, height: Int) {}
+      override fun surfaceDestroyed(holder: SurfaceHolder) {
+        ScreenService.INSTANCE?.stopPreview()
+      }
+    })
+
     swTts.setOnCheckedChangeListener { _, isChecked ->
       if (isLoadingPreferences) return@setOnCheckedChangeListener
       ScreenService.INSTANCE?.setTtsEnabled(isChecked)
@@ -294,7 +324,7 @@ class ScreenActivity : AppCompatActivity(), ScreenServiceCallback {
     }
 
     button.setOnClickListener {
-      val service = ScreenService.INSTANCE
+      val service = getOrStartService()
       if (service != null) {
         service.setCallback(this)
         if (isCountingDown) {
@@ -308,25 +338,28 @@ class ScreenActivity : AppCompatActivity(), ScreenServiceCallback {
         } else {
           stopStream()
         }
+      } else {
+        toast("Service not ready")
       }
     }
 
     bRecord.setOnClickListener {
-      val service = ScreenService.INSTANCE
+      val service = getOrStartService()
       if (service != null) {
         service.setCallback(this)
         if (!service.isStreaming() && !service.isRecording()) {
           action = Action.RECORD
           activityResultContract.launch(service.sendIntent())
         } else toggleRecord()
+      } else {
+        toast("Service not ready")
       }
     }
 
     bEvents.setOnClickListener {
-      val service = ScreenService.INSTANCE
+      val service = getOrStartService()
       if (service == null) {
-        startService(Intent(this, ScreenService::class.java))
-        toast("Starting service, tap again")
+        toast("Service not ready")
         return@setOnClickListener
       }
       service.setCallback(this)
@@ -505,7 +538,10 @@ class ScreenActivity : AppCompatActivity(), ScreenServiceCallback {
       tabLayout.getTabAt(1)?.select()
     }
     tabPreview.post {
-      ScreenService.INSTANCE?.startCapture(surfaceView)
+      val service = getOrStartService()
+      if (surfaceView.holder.surface.isValid) {
+        service?.startCapture(surfaceView)
+      }
       beginCountdown(endpoint)
     }
   }

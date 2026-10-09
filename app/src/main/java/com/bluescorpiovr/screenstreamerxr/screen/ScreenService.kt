@@ -38,6 +38,7 @@ import androidx.core.app.NotificationManagerCompat
 import com.pedro.common.AudioCodec
 import com.pedro.common.ConnectChecker
 import com.pedro.common.VideoCodec
+import com.pedro.encoder.input.sources.MediaProjectionHandler
 import com.pedro.encoder.input.sources.audio.AudioSource
 import com.pedro.encoder.input.sources.audio.InternalAudioSource
 import com.pedro.encoder.input.sources.audio.MicrophoneSource
@@ -163,21 +164,25 @@ class ScreenService: Service(), ConnectChecker {
       setVideoCodec(VideoCodec.H264)
       setAudioCodec(AudioCodec.AAC)
     }
+    INSTANCE = this
+    initTTS()
+    ensurePrepared()
+  }
+
+  fun ensurePrepared(): Boolean {
+    if (prepared) return true
+    genericStream.getGlInterface().setForceRender(true, fps)
     prepared = try {
       genericStream.prepareVideo(width, height, vBitrate, fps = fps, rotation = rotation, iFrameInterval = 2) &&
           genericStream.prepareAudio(sampleRate, isStereo, aBitrate,
             echoCanceler = true,
             noiseSuppressor = true
           )
-    } catch (_: IllegalArgumentException) {
+    } catch (e: Exception) {
+      Log.e(TAG, "prepare error", e)
       false
     }
-    if (prepared) {
-      INSTANCE = this
-      initTTS()
-    } else {
-      toast("Invalid audio or video parameters, prepare failed")
-    }
+    return prepared
   }
 
   private fun initTTS() {
@@ -552,7 +557,7 @@ class ScreenService: Service(), ConnectChecker {
     chatNotificationSlot = (chatNotificationSlot + 1) % CHAT_NOTIFY_SLOTS
   }
 
-  private fun keepAliveTrick() {
+  private fun keepAliveTrick(includeMediaProjection: Boolean = mediaProjection != null): Boolean {
     val notification = NotificationCompat.Builder(this, CHANNEL_ID)
       .setSmallIcon(R.drawable.notification_icon)
       .setContentTitle("Screen Streamer XR")
@@ -561,16 +566,29 @@ class ScreenService: Service(), ConnectChecker {
       .setOngoing(false)
       .build()
     if (Build.VERSION.SDK_INT >= 34) {
-      val serviceTypes = if (mediaProjection != null) {
+      val serviceTypes = if (includeMediaProjection) {
         ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PROJECTION or
           ServiceInfo.FOREGROUND_SERVICE_TYPE_MICROPHONE
       } else {
         ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC
       }
-      startForeground(1, notification, serviceTypes)
-    } else {
-      startForeground(1, notification)
+      if (!includeMediaProjection) {
+        try {
+          stopForeground(STOP_FOREGROUND_REMOVE)
+        } catch (e: Exception) {
+          Log.w(TAG, "stopForeground error", e)
+        }
+      }
+      return try {
+        startForeground(1, notification, serviceTypes)
+        true
+      } catch (e: Exception) {
+        Log.e(TAG, "startForeground failed", e)
+        false
+      }
     }
+    startForeground(1, notification)
+    return true
   }
 
   override fun onBind(p0: Intent?): IBinder? {
@@ -599,6 +617,29 @@ class ScreenService: Service(), ConnectChecker {
       genericStream.stopStream()
       notificationManager?.cancel(NOTIFY_ID)
     }
+    if (genericStream.isRecording) return
+    if (genericStream.isOnPreview) genericStream.stopPreview()
+    releaseScreenCapture()
+  }
+
+  private fun releaseScreenCapture() {
+    val projection = mediaProjection ?: return
+    mediaProjection = null
+    MediaProjectionHandler.mediaProjection = null
+    try {
+      projection.stop()
+    } catch (e: Exception) {
+      Log.w(TAG, "mediaProjection stop failed", e)
+    }
+    if (isListeningToEvents()) {
+      keepAliveTrick(includeMediaProjection = false)
+    } else {
+      try {
+        stopForeground(STOP_FOREGROUND_REMOVE)
+      } catch (e: Exception) {
+        Log.w(TAG, "stopForeground error", e)
+      }
+    }
   }
 
   fun setCallback(cb: ScreenServiceCallback?) {
@@ -620,17 +661,26 @@ class ScreenService: Service(), ConnectChecker {
   }
 
   fun prepareStream(resultCode: Int, data: Intent): Boolean {
-    keepAliveTrick()
     stopStream()
     mediaProjection?.stop()
-    val mediaProjection = mediaProjectionManager.getMediaProjection(resultCode, data) ?: throw IllegalStateException("get MediaProjection failed")
+    mediaProjection = null
+    if (!keepAliveTrick(includeMediaProjection = true)) return false
+    val mediaProjection = try {
+      mediaProjectionManager.getMediaProjection(resultCode, data)
+        ?: throw IllegalStateException("get MediaProjection failed")
+    } catch (e: Exception) {
+      Log.e(TAG, "getMediaProjection failed", e)
+      return false
+    }
     this.mediaProjection = mediaProjection
+    ensurePrepared()
     val screenSource = ScreenSource(applicationContext, mediaProjection)
     return try {
       genericStream.changeVideoSource(screenSource)
       toggleAudioSource(selectedAudioSource)
       true
-    } catch (_: IllegalArgumentException) {
+    } catch (e: Exception) {
+      Log.e(TAG, "prepareStream failed", e)
       false
     }
   }
@@ -638,30 +688,50 @@ class ScreenService: Service(), ConnectChecker {
   fun getCurrentAudioSource(): AudioSource = genericStream.audioSource
 
   fun toggleAudioSource(itemId: Int) {
-    when (itemId) {
-      R.id.audio_source_microphone -> {
-        selectedAudioSource = R.id.audio_source_microphone
-        if (genericStream.audioSource is MicrophoneSource) return
-        genericStream.changeAudioSource(MicrophoneSource())
-      }
-      R.id.audio_source_internal -> {
-        selectedAudioSource = R.id.audio_source_internal
-        if (genericStream.audioSource is InternalAudioSource) return
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-          mediaProjection?.let { genericStream.changeAudioSource(InternalAudioSource(it)) }
-        } else {
-          throw IllegalArgumentException("You need min API 29+")
+    selectedAudioSource = itemId
+    ensurePrepared()
+    val projection = mediaProjection
+    val currentSource = genericStream.audioSource
+
+    val shouldRecreate = when (itemId) {
+      R.id.audio_source_microphone -> currentSource !is MicrophoneSource || !currentSource.created
+      R.id.audio_source_internal -> currentSource !is InternalAudioSource || !currentSource.created
+      R.id.audio_source_mix -> currentSource !is MixAudioSource || !currentSource.created
+      else -> true
+    }
+
+    val newSource: AudioSource = if (!shouldRecreate) {
+      currentSource
+    } else {
+      when (itemId) {
+        R.id.audio_source_microphone -> MicrophoneSource()
+        R.id.audio_source_internal -> {
+          if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && projection != null) {
+            InternalAudioSource(projection)
+          } else {
+            MicrophoneSource()
+          }
         }
-      }
-      R.id.audio_source_mix -> {
-        selectedAudioSource = R.id.audio_source_mix
-        if (genericStream.audioSource is MixAudioSource) return
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-          mediaProjection?.let { genericStream.changeAudioSource(MixAudioSource(it)) }
-        } else {
-          throw IllegalArgumentException("You need min API 29+")
+        R.id.audio_source_mix -> {
+          if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && projection != null) {
+            MixAudioSource(projection)
+          } else {
+            MicrophoneSource()
+          }
         }
+        else -> MicrophoneSource()
       }
+    }
+
+    try {
+      if (!newSource.created && !currentSource.created) {
+        newSource.init(sampleRate, isStereo, echoCanceler = true, noiseSuppressor = true)
+      }
+      if (shouldRecreate) {
+        genericStream.changeAudioSource(newSource)
+      }
+    } catch (e: Exception) {
+      Log.e(TAG, "toggleAudioSource failed", e)
     }
   }
 
@@ -699,13 +769,25 @@ class ScreenService: Service(), ConnectChecker {
   }
 
   fun startStream(endpoint: String) {
-    if (!genericStream.isStreaming) genericStream.startStream(endpoint)
+    try {
+      if (!genericStream.isStreaming) genericStream.startStream(endpoint)
+    } catch (e: Exception) {
+      Log.e(TAG, "startStream failed", e)
+      if (genericStream.isStreaming) genericStream.stopStream()
+      toast("Failed to start stream: ${e.message}")
+      callback?.onConnectionFailed(e.message ?: "Unknown error")
+    }
   }
 
   fun startPreview(surfaceView: SurfaceView) {
-    if (genericStream.isOnPreview || genericStream.isStreaming) return
-    if (surfaceView.holder.surface.isValid) {
-      genericStream.startPreview(surfaceView)
+    try {
+      if (genericStream.isOnPreview || genericStream.isStreaming) return
+      if (surfaceView.holder.surface.isValid) {
+        genericStream.startPreview(surfaceView)
+      }
+    } catch (e: Exception) {
+      Log.e(TAG, "startPreview failed", e)
+      if (genericStream.isOnPreview) genericStream.stopPreview()
     }
   }
 

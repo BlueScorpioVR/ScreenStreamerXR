@@ -35,7 +35,7 @@ import com.pedro.encoder.input.sources.OrientationForced
  */
 @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
 class ScreenSource @JvmOverloads constructor(
-  context: Context,
+  private val context: Context,
   mediaProjection: MediaProjection,
   mediaProjectionCallback: MediaProjection.Callback? = null,
   virtualDisplayCallback: VirtualDisplay.Callback? = null
@@ -47,7 +47,11 @@ class ScreenSource @JvmOverloads constructor(
   private var handlerThread = HandlerThread(TAG)
   private val mediaProjectionCallback = mediaProjectionCallback ?: object : MediaProjection.Callback() {}
   private val virtualDisplayCallback = virtualDisplayCallback ?: object : VirtualDisplay.Callback() {}
-  private val dpi = context.resources.displayMetrics.densityDpi
+  private val safeDpi: Int
+    get() {
+      val rawDpi = context.resources.displayMetrics.densityDpi
+      return if (rawDpi in 120..640) rawDpi else 320
+    }
 
   init {
       MediaProjectionHandler.mediaProjection = mediaProjection
@@ -65,14 +69,14 @@ class ScreenSource @JvmOverloads constructor(
     val shouldRotate = rotation == 90 || rotation == 270
     val displayWidth = if (shouldRotate) height else width
     val displayHeight = if (shouldRotate) width else height
-    if (shouldRotate) surfaceTexture.setDefaultBufferSize(height, width)
+    surfaceTexture.setDefaultBufferSize(displayWidth, displayHeight)
     val handlerThread = HandlerThread(TAG)
     handlerThread.start()
     MediaProjectionHandler.mediaProjection?.registerCallback(mediaProjectionCallback, Handler(handlerThread.looper))
     val surface = Surface(surfaceTexture)
     try {
       val virtualDisplay = MediaProjectionHandler.mediaProjection?.createVirtualDisplay(TAG,
-        displayWidth, displayHeight, dpi, flags,
+        displayWidth, displayHeight, safeDpi, flags,
         surface, virtualDisplayCallback, Handler(handlerThread.looper)
       )
       if (virtualDisplay == null) {
@@ -118,6 +122,6 @@ class ScreenSource @JvmOverloads constructor(
   }
 
   fun resize(width: Int, height: Int) {
-    virtualDisplay?.resize(width, height, dpi)
+    virtualDisplay?.resize(width, height, safeDpi)
   }
 }

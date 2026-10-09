@@ -97,9 +97,15 @@ class OmniStreamClient(
     if (!running) return
     val generation = ++socketGeneration
     webSocket?.cancel()
-    val request = Request.Builder()
-      .url("ws://$host:3000/ws")
-      .build()
+    val request = try {
+      Request.Builder()
+        .url("ws://$host:3000/ws")
+        .build()
+    } catch (e: Exception) {
+      callback.onLog("OmniStream: Invalid host URL ws://$host:3000/ws")
+      callback.onStatusChange(false)
+      return
+    }
     webSocket = webSocketClient.newWebSocket(request, object : WebSocketListener() {
       override fun onOpen(webSocket: WebSocket, response: Response) {
         if (generation != socketGeneration) return
@@ -212,10 +218,15 @@ class OmniStreamClient(
   }
 
   private fun pollViewerCounts() {
-    val request = Request.Builder()
-      .url("http://$host:3000/api/v1/twitch-compat/helix/streams")
-      .get()
-      .build()
+    val request = try {
+      Request.Builder()
+        .url("http://$host:3000/api/v1/twitch-compat/helix/streams")
+        .get()
+        .build()
+    } catch (e: Exception) {
+      logPollError("Invalid host URL: ${e.message}")
+      return
+    }
     try {
       httpClient.newCall(request).execute().use { response ->
         val body = response.body?.string().orEmpty()

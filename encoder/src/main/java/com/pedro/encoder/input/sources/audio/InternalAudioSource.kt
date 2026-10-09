@@ -73,7 +73,7 @@ class InternalAudioSource(
       .addMatchingUsage(AudioAttributes.USAGE_UNKNOWN).build()
     try {
       val result = microphone.createInternalMicrophone(config, sampleRate, isStereo,
-        echoCanceler, noiseSuppressor)
+        false, false)
       if (!result) throw IllegalArgumentException("Failed to create internal audio source")
     } catch (_: UnsupportedOperationException) {
       throw IllegalArgumentException("invalid MediaProjection used")
